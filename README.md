@@ -29,7 +29,7 @@ This is a deliberately vulnerable Django application built to demonstrate common
    ```
    Then in the Python shell:
    ```python
-   from vulnapp.models import User
+   from webapp.models import User
    User.objects.create(username='admin', password='admin123', email='admin@example.com', is_admin=True)
    User.objects.create(username='user', password='password', email='user@example.com', is_admin=False)
    exit()
@@ -64,7 +64,7 @@ This is a deliberately vulnerable Django application built to demonstrate common
    - **Test:** Post `<script>alert('XSS')</script>` as a comment
 
 ### 4. **CSRF Protection Disabled**
-   - **Location:** Global setting in `settings.py`
+   - **Location:** Global setting in `config/settings.py`
    - **Vulnerability:** CsrfViewMiddleware is commented out
    - **Impact:** All POST requests are vulnerable to CSRF attacks
 
@@ -74,12 +74,12 @@ This is a deliberately vulnerable Django application built to demonstrate common
    - **Test:** Try `?file=../../../etc/passwd`
 
 ### 6. **Hardcoded Secret Key**
-   - **Location:** `settings.py`
+   - **Location:** `config/settings.py`
    - **Vulnerability:** Secret key is hardcoded in source code
    - **Impact:** Can be used to forge session cookies
 
 ### 7. **Plain Text Password Storage**
-   - **Location:** User model in `models.py`
+   - **Location:** User model in `webapp/models.py`
    - **Vulnerability:** Passwords stored without hashing
    - **Impact:** Complete password exposure if database is compromised
 
@@ -89,7 +89,7 @@ This is a deliberately vulnerable Django application built to demonstrate common
    - **Impact:** Vulnerable to brute force and timing attacks
 
 ### 9. **Insecure Security Headers**
-   - **Location:** `settings.py`
+   - **Location:** `config/settings.py`
    - **Vulnerabilities:**
      - XSS filter disabled
      - Content type sniffing allowed
@@ -97,32 +97,50 @@ This is a deliberately vulnerable Django application built to demonstrate common
      - Clickjacking allowed
 
 ### 10. **No Password Validation**
-   - **Location:** `settings.py`
+   - **Location:** `config/settings.py`
    - **Vulnerability:** `AUTH_PASSWORD_VALIDATORS` is empty
    - **Impact:** Users can set weak passwords
+
+### 11. **Vulnerable Dependencies**
+   - **Pillow 9.3.0**: CVE-2023-50447 (Arbitrary code execution via crafted images)
+   - **PyYAML 5.3.1**: CVE-2020-14343 (Arbitrary code execution via unsafe YAML loading)
+   - **Requests 2.32.0**: Potential SSRF vulnerabilities
 
 ## File Structure
 
 ```
 vulndjangoapp/
 ├── manage.py
-├── pyproject.toml          # uv configuration with vulnerable Django 3.2.0
-├── uv.lock                 # Locked dependencies
-├── vulndjangoapp/
+├── pyproject.toml          # Project configuration with vulnerable dependencies
+├── uv.lock                 # Locked dependencies (managed by uv)
+├── db.sqlite3              # SQLite database (created after migrations)
+├── .github/
+│   ├── dependabot.yml      # Dependabot configuration for automated updates
+│   └── workflows/
+│       ├── auto-merge-dependabot.yml  # Auto-merge workflow for Dependabot PRs
+│       ├── tests.yml       # Automated testing workflow
+│       └── code-quality.yml  # Code quality and security checks
+├── scripts/
+│   └── auto_merge.py       # Dependabot auto-merge decision helper
+├── config/
 │   ├── __init__.py
 │   ├── settings.py         # Insecure Django settings
 │   ├── urls.py
 │   ├── asgi.py
 │   └── wsgi.py
-└── vulnapp/
+└── webapp/
     ├── __init__.py
     ├── admin.py
     ├── apps.py
     ├── models.py           # Vulnerable data models
     ├── urls.py
     ├── views.py            # Vulnerable view functions
+    ├── utils.py            # Utility functions using vulnerable dependencies
+    ├── tests.py            # Unit tests
+    ├── migrations/
+    │   └── 0001_initial.py
     └── templates/
-        └── vulnapp/
+        └── webapp/
             ├── index.html
             ├── search.html
             ├── comments.html
@@ -136,6 +154,46 @@ This application is designed for:
 - Penetration testing practice
 - Vulnerability scanning tool testing
 - Security awareness demonstrations
+- Testing automated dependency management and security workflows
+
+## Automated Dependency Management
+
+This project uses **Dependabot** with automated PR processing:
+
+- **Dependabot**: Configured via `.github/dependabot.yml` to automatically check for dependency updates weekly
+- **Auto-merge workflow**: Automatically evaluates and merges Dependabot PRs based on:
+  - **Patch updates**: Auto-merged automatically
+  - **Minor updates**: Auto-merged if compatibility score ≥ 80%
+  - **Major updates**: Require manual review
+- **Update grouping**: Patch and minor updates are grouped to reduce PR noise
+- **Lock file support**: Automatically updates both `pyproject.toml` and `uv.lock`
+
+### Auto-merge Decision Logic
+
+The `scripts/auto_merge.py` script evaluates Dependabot PRs using:
+1. Semantic versioning analysis (Major/Minor/Patch)
+2. Dependabot compatibility score extraction
+3. Configurable threshold (default: 80%)
+4. Support for manual override via `no-auto-merge` label
+
+## CI/CD Workflows
+
+### Automated Tests
+- Runs on every PR and push to main/develop
+- Executes Django migrations and unit tests
+- Uses `uv` for dependency management
+
+### Code Quality Checks
+- **Ruff**: Linting and formatting
+- **Bandit**: Security vulnerability scanning
+- **Safety**: Dependency vulnerability checking
+- **Pre-commit hooks**: Automated code quality enforcement
+
+### Auto-merge Dependabot
+- Evaluates Dependabot PRs automatically
+- Enables GitHub's native auto-merge for qualifying updates
+- Posts detailed decision rationale as PR comments
+- Supports manual threshold override via workflow dispatch
 
 ## Security Tools to Test With
 
@@ -144,11 +202,21 @@ This application is designed for:
 - **SQLMap** - Automated SQL injection testing
 - **Bandit** - Python security linter
 - **Safety** - Dependency vulnerability scanner
+- **Ruff** - Fast Python linter with security rules
 
-Run dependency scan:
+Run security scans:
 ```bash
-uv run pip install safety
+# Install security tools
+uv sync --group lint
+
+# Run Bandit security scan
+uv run bandit -r webapp/ config/
+
+# Run Safety dependency check
 uv run safety check
+
+# Run Ruff linter
+uv run ruff check .
 ```
 
 ## License

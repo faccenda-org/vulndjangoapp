@@ -14,12 +14,12 @@ import logging
 import os
 import re
 import sys
-import requests
-
 from typing import Optional, Tuple
 
+import requests
+
 try:
-    from github import Github, Auth
+    from github import Auth, Github
 except Exception:  # Fallback: allow local syntax checks without PyGithub installed
     Github = None
     Auth = None
@@ -93,14 +93,14 @@ def get_compat_score(body: str) -> Optional[int]:
                     return int(compat_score_match.group(1))
             except ValueError:
                 continue
-    return "unkown"
+    return "unknown"
 
 
 def read_event() -> Optional[dict]:
     path = os.environ.get("GITHUB_EVENT_PATH")
     if path and os.path.exists(path):
         logging.debug(f"Reading GitHub event payload from {path}")
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     return None
 
@@ -318,11 +318,9 @@ def handle_skip_label(pr_obj, issue, reason_parts: list[str]) -> bool:
     logging.debug(f"PR labels: {label_names}; skip_label={skip_label}")
     if skip_label in [name.lower() for name in label_names]:
         issue.create_comment(
-            (
-                f"## Dependabot Auto-merge: ⛔ **Skipping auto-merge** due to `{skip_label}` label\n\n"
-                + "### 📋 Decision Details\n"
-                + "\n".join(f"- {part}" for part in reason_parts)
-            )
+            f"## Dependabot Auto-merge: ⛔ **Skipping auto-merge** due to `{skip_label}` label\n\n"
+            + "### 📋 Decision Details\n"
+            + "\n".join(f"- {part}" for part in reason_parts)
         )
         append_summary(
             f"## ⛔ Skipping Auto-merge\n\n"
@@ -409,12 +407,10 @@ def post_success_comment(
 def local_automerge_note(issue) -> None:
     merge_method = os.environ.get("MERGE_METHOD", "squash")
     issue.create_comment(
-        (
-            "## Dependabot Auto-merge: 🧪 **Local run simulation**\n\n"
-            + "Would enable auto-merge in production.\n\n"
-            + "### ⚙️ Settings\n"
-            + f"- **Merge method:** `{merge_method}`"
-        )
+        "## Dependabot Auto-merge: 🧪 **Local run simulation**\n\n"
+        + "Would enable auto-merge in production.\n\n"
+        + "### ⚙️ Settings\n"
+        + f"- **Merge method:** `{merge_method}`"
     )
     logging.info("Posted local auto-merge settings comment")
 
