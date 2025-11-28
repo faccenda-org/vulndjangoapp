@@ -6,6 +6,9 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db import connection
 from .models import User, Comment
+from .utils import process_image, load_yaml_config, make_api_request
+import tempfile
+import os
 
 
 def index(request):
@@ -79,3 +82,89 @@ def user_profile(request):
         return HttpResponse(f"<pre>{content}</pre>")
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
+
+
+def upload_image(request):
+    """
+    Image upload with Pillow processing vulnerability
+    Uses Pillow 9.3.0 (CVE-2023-50447)
+    """
+    if request.method == 'POST' and request.FILES.get('image'):
+        uploaded_file = request.FILES['image']
+
+        # Save to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.tmp') as tmp:
+            for chunk in uploaded_file.chunks():
+                tmp.write(chunk)
+            tmp_path = tmp.name
+
+        try:
+            # VULNERABLE: Process image with vulnerable Pillow version
+            metadata = process_image(tmp_path)
+            return HttpResponse(f"<pre>Image Metadata:\n{metadata}</pre>")
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+    return HttpResponse("""
+        <h1>Upload Image (Pillow CVE-2023-50447)</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*">
+            <button type="submit">Upload</button>
+        </form>
+        <p><a href="/">← Back</a></p>
+    """)
+
+
+def load_config(request):
+    """
+    YAML config loading vulnerability
+    Uses PyYAML 5.3.1 (CVE-2020-14343)
+    """
+    if request.method == 'POST':
+        yaml_content = request.POST.get('config', '')
+
+        # VULNERABLE: Unsafe YAML loading
+        try:
+            config = load_yaml_config(yaml_content)
+            return HttpResponse(f"<pre>Loaded config:\n{config}</pre>")
+        except Exception as e:
+            return HttpResponse(f"<pre>Error: {e}</pre>")
+
+    return HttpResponse("""
+        <h1>Load YAML Config (PyYAML CVE-2020-14343)</h1>
+        <p>⚠️ Vulnerable to arbitrary code execution!</p>
+        <form method="POST">
+            <textarea name="config" rows="10" cols="50">
+database:
+  host: localhost
+  port: 5432
+            </textarea><br>
+            <button type="submit">Load Config</button>
+        </form>
+        <p><a href="/">← Back</a></p>
+    """)
+
+
+def proxy_request(request):
+    """
+    SSRF vulnerability via requests library
+    Uses requests 2.25.0 (CVE-2021-33503)
+    """
+    url = request.GET.get('url', '')
+
+    if url:
+        # VULNERABLE: SSRF via requests with redirect vulnerability
+        result = make_api_request(url)
+        return HttpResponse(f"<pre>Response:\n{result}</pre>")
+
+    return HttpResponse("""
+        <h1>Proxy Request (Requests CVE-2021-33503)</h1>
+        <p>⚠️ Vulnerable to SSRF attacks!</p>
+        <form method="GET">
+            <input type="text" name="url" value="https://api.github.com/zen" size="50">
+            <button type="submit">Fetch</button>
+        </form>
+        <p><a href="/">← Back</a></p>
+    """)
+

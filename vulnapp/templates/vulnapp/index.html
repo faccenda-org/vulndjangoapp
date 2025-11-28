@@ -26,11 +26,17 @@
         <li>💬 <a href="/comments/">XSS Comment Board</a> - Try: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></li>
         <li>🔐 <a href="/login/">Weak Authentication</a> - Plain text passwords</li>
         <li>📁 <a href="/profile/?file=profile.txt">Path Traversal</a> - Try: <code>../../../etc/passwd</code></li>
+        <li>🖼️ <a href="/upload/">Image Upload</a> - Pillow CVE-2023-50447 (code execution)</li>
+        <li>⚙️ <a href="/config/">YAML Config</a> - PyYAML CVE-2020-14343 (code execution)</li>
+        <li>🌐 <a href="/proxy/">Proxy Request</a> - Requests CVE-2021-33503 (SSRF)</li>
     </ul>
 
     <h2>Known Vulnerabilities:</h2>
     <ul>
         <li>Django 3.2.0 (Multiple Critical CVEs)</li>
+        <li>Pillow 9.3.0 (CVE-2023-50447 - Arbitrary code execution)</li>
+        <li>PyYAML 5.3.1 (CVE-2020-14343 - Arbitrary code execution)</li>
+        <li>Requests 2.25.0 (CVE-2021-33503 - SSRF vulnerability)</li>
         <li>SQL Injection</li>
         <li>Cross-Site Scripting (XSS)</li>
         <li>CSRF Protection Disabled</li>

@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "django==3.2.0",  # Has multiple critical CVEs including SQL injection, XSS, and security bypass
+    "pillow==9.3.0",  # CVE-2023-50447 (arbitrary code execution) - fixable with Minor update to 10.0.1+
+    "pyyaml==5.3.1",  # CVE-2020-14343 (arbitrary code execution) - fixable with Patch update to 5.4
+    "requests==2.25.0",  # CVE-2021-33503 (SSRF) - fixable with Minor update to 2.27.0+
 ]
 
 [build-system]
@@ -13,4 +16,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
-dev = []
+dev = [
+    "pytest>=7.0.0",
+    "pytest-django>=4.5.0",
+]
