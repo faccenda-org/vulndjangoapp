@@ -20,3 +20,8 @@ dev = [
     "pytest>=7.0.0",
     "pytest-django>=4.5.0",
 ]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "vulndjangoapp.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-v --tb=short"
