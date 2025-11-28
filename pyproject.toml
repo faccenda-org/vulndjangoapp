@@ -7,7 +7,7 @@ requires-python = ">=3.8"
 dependencies = [
     "django==3.2.0",
     "pillow==9.3.0",
-    "pyyaml==5.3.1",
+    "pyyaml==5.4",
     "requests==2.32.0",
 ]
 
