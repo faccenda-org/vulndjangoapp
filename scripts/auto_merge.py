@@ -258,6 +258,51 @@ def connect_github(token: str, repo_full: str, pr_number: int) -> tuple:
     return repo, issue, pr_obj
 
 
+def create_check_run(token: str, repo_full: str, head_sha: str, outcome: str) -> None:
+    """Create a GitHub check run with appropriate conclusion based on outcome."""
+    if outcome.startswith("🚀"):
+        conclusion = "success"
+        title = "🚀 Auto-merge Enabled"
+    elif outcome.startswith("👀"):
+        conclusion = "action_required"
+        title = "👀 Manual Review Required"
+    elif outcome.startswith("⛔"):
+        conclusion = "neutral"
+        title = "⛔ Auto-merge Skipped"
+    else:
+        conclusion = "failure"
+        title = "❌ Auto-merge Error"
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+
+    data = {
+        "name": "Dependabot Auto-merge Decision",
+        "head_sha": head_sha,
+        "status": "completed",
+        "conclusion": conclusion,
+        "output": {
+            "title": title,
+            "summary": outcome,
+        },
+    }
+
+    try:
+        response = requests.post(
+            f"https://api.github.com/repos/{repo_full}/check-runs",
+            headers=headers,
+            json=data,
+        )
+        if response.status_code == 201:
+            logging.info(f"Created check run with conclusion: {conclusion}")
+        else:
+            logging.warning(f"Failed to create check run: {response.text}")
+    except Exception as e:
+        logging.error(f"Error creating check run: {e}")
+
+
 def disable_automerge(token: str, pr_obj) -> None:
     """Disable auto-merge on PR using GraphQL API."""
     node_id = pr_obj.node_id
@@ -549,10 +594,43 @@ def main(argv: list[str]) -> int:
     if not token:
         print("GITHUB_TOKEN is required", file=sys.stderr)
         return 1
+
+    # Read outcome after decision
+    outcome_msg = ""
     try:
-        return run_decision_flow(args, token)
+        exit_code = run_decision_flow(args, token)
+
+        # Read the decision outcome
+        if os.path.exists("decision_outcome.txt"):
+            with open("decision_outcome.txt") as f:
+                outcome_msg = f.read().strip()
+
+        # Create check run if running in GitHub Actions
+        repo_full = os.environ.get("GITHUB_REPOSITORY")
+        head_sha = os.environ.get("GITHUB_SHA")
+        event_path = os.environ.get("GITHUB_EVENT_PATH")
+
+        # Try to get PR head SHA from event
+        if event_path and os.path.exists(event_path):
+            with open(event_path) as f:
+                event = json.load(f)
+                if "pull_request" in event:
+                    head_sha = event["pull_request"]["head"]["sha"]
+
+        if repo_full and head_sha and outcome_msg:
+            create_check_run(token, repo_full, head_sha, outcome_msg)
+
+        return exit_code
+
     except ValueError as err:
         print(str(err), file=sys.stderr)
+
+        # Create failure check if in Actions
+        repo_full = os.environ.get("GITHUB_REPOSITORY")
+        head_sha = os.environ.get("GITHUB_SHA")
+        if repo_full and head_sha:
+            create_check_run(token, repo_full, head_sha, f"❌ Error: {err}")
+
         return 1
 
 
