@@ -1,0 +1,68 @@
+name: Auto-merge Dependabot PRs
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      compat_threshold:
+        description: "Override compatibility threshold (percent) for this run"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  MERGE_METHOD: squash
+  DEFAULT_COMPAT_THRESHOLD: "80"
+  NO_AUTO_MERGE_LABEL: no-auto-merge
+
+jobs:
+  skip-non-dependabot:
+    if: ${{ github.event_name != 'workflow_dispatch' && (github.event.pull_request.user.login != 'dependabot[bot]' || !startsWith(github.event.pull_request.head.ref, 'dependabot/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip workflow for non-Dependabot PRs
+        run: |
+          echo "Skipping - Not a Dependabot PR or manual dispatch. Actor: ${{ github.event.pull_request.user.login }} - Event name: ${{ github.event_name }}"
+
+  check-and-merge:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.pull_request.user.login == 'dependabot[bot]' && startsWith(github.event.pull_request.head.ref, 'dependabot/')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: 21
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyGithub requests
+
+      - name: Run auto-merge decision
+        id: decision
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMPAT_THRESHOLD: ${{ github.event.inputs.compat_threshold }}
+        run: |
+          python scripts/auto_merge.py
+
+      - name: Set check status
+        if: always()
+        run: |
+          if [ -f decision_outcome.txt ]; then
+            OUTCOME=$(cat decision_outcome.txt)
+            echo "::notice title=Auto-merge Decision::${OUTCOME}"
+          fi
