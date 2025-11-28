@@ -26,21 +26,39 @@ except Exception:  # Fallback: allow local syntax checks without PyGithub instal
 
 
 def parse_version(v: str) -> Optional[Tuple[int, int, int]]:
-    match = re.match(r"^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$", v.strip())
+    """
+    Parse version string into (major, minor, patch) tuple.
+    Supports semver variants:
+    - X.Y.Z (standard semver)
+    - X.Y (assumes patch=0)
+    - X.Y.Z.W (ignores W and beyond)
+    """
+    v = v.strip()
+
+    # Try standard X.Y.Z or X.Y.Z.W (with optional pre-release/build metadata)
+    match = re.match(r"^(\d+)\.(\d+)(?:\.(\d+))?(?:\.\d+)?(?:[-+].*)?$", v)
     if not match:
         return None
-    return int(match.group(1)), int(match.group(2)), int(match.group(3))
+
+    major = int(match.group(1))
+    minor = int(match.group(2))
+    patch = int(match.group(3)) if match.group(3) else 0
+
+    return major, minor, patch
 
 
 def get_upgrade_type(title: str) -> str:
     logging.debug(f"Parsing upgrade type from title: {title}")
+
+    # Match various version formats: X.Y.Z, X.Y, X.Y.Z.W
     bump = re.search(
-        r"bump\s+.+\s+from\s+([0-9]+\.[0-9]+\.[0-9]+)\s+to\s+([0-9]+\.[0-9]+\.[0-9]+)",
+        r"bump\s+.+\s+from\s+([\d.]+(?:[-+][^\s]+)?)\s+to\s+([\d.]+(?:[-+][^\s]+)?)",
         title,
         re.IGNORECASE,
     )
     if not bump:
         return "not-semver"
+
     from_v = parse_version(bump.group(1))
     to_v = parse_version(bump.group(2))
     logging.debug(
