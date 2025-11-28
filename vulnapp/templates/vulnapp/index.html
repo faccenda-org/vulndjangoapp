@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vulnerable Django App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        h1 { color: #d9534f; }
+        .warning { background: #f0ad4e; padding: 10px; margin: 20px 0; border-radius: 5px; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; }
+        a { color: #0275d8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>⚠️ Vulnerable Django Application</h1>
+    <div class="warning">
+        <strong>WARNING:</strong> This application contains intentional security vulnerabilities.
+        It is designed for security testing and educational purposes only.
+        <strong>DO NOT USE IN PRODUCTION!</strong>
+    </div>
+
+    <h2>Available Endpoints:</h2>
+    <ul>
+        <li>🔍 <a href="/search/?username=admin">SQL Injection Demo</a> - Try: <code>admin' OR '1'='1</code></li>
+        <li>💬 <a href="/comments/">XSS Comment Board</a> - Try: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></li>
+        <li>🔐 <a href="/login/">Weak Authentication</a> - Plain text passwords</li>
+        <li>📁 <a href="/profile/?file=profile.txt">Path Traversal</a> - Try: <code>../../../etc/passwd</code></li>
+    </ul>
+
+    <h2>Known Vulnerabilities:</h2>
+    <ul>
+        <li>Django 3.2.0 (Multiple Critical CVEs)</li>
+        <li>SQL Injection</li>
+        <li>Cross-Site Scripting (XSS)</li>
+        <li>CSRF Protection Disabled</li>
+        <li>Path Traversal</li>
+        <li>Hardcoded Secret Key</li>
+        <li>Plain Text Password Storage</li>
+        <li>No Password Validation</li>
+        <li>Insecure Security Headers</li>
+    </ul>
+</body>
+</html>

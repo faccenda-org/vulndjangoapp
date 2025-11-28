@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Weak Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        .warning { background: #f0ad4e; padding: 10px; margin: 20px 0; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 8px; margin: 5px 0; }
+        button { width: 100%; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Login</h1>
+    <div class="warning">
+        ⚠️ Plain text passwords! No rate limiting! Timing attacks possible!
+    </div>
+
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p><a href="/">← Back to Home</a></p>
+</body>
+</html>
