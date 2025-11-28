@@ -1,0 +1,95 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lint-and-security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          uv sync --group lint
+
+      - name: Run Ruff linter
+        run: |
+          uv run ruff check . --output-format=github
+        continue-on-error: true
+
+      - name: Run Ruff formatter check
+        run: |
+          uv run ruff format --check .
+        continue-on-error: true
+
+      - name: Run Bandit security scan
+        run: |
+          uv run bandit -r webapp/ config/ -f json -o bandit-report.json || true
+          uv run bandit -r webapp/ config/ -f screen
+        continue-on-error: true
+
+      - name: Run Safety dependency check
+        run: |
+          uv run safety check --json || true
+          echo "⚠️ Note: This project intentionally uses vulnerable dependencies for testing"
+        continue-on-error: true
+
+      - name: Upload Bandit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Code Quality Check Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Ruff linting completed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Bandit security scan completed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Safety dependency check completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Note**: This is a deliberately vulnerable application." >> $GITHUB_STEP_SUMMARY
+          echo "Security issues are expected and intentional for testing purposes." >> $GITHUB_STEP_SUMMARY
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          uv sync --group lint
+
+      - name: Run pre-commit hooks
+        run: |
+          uv run pre-commit run --all-files
+        continue-on-error: true

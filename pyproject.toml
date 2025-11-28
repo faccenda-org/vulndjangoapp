@@ -23,8 +23,46 @@ dev = [
     "pytest>=7.0.0",
     "pytest-django>=4.5.0",
 ]
+lint = [
+    "bandit[toml]>=1.7.0",
+    "ruff>=0.1.0",
+    "safety>=3.0.0",
+    "pre-commit>=3.0.0",
+]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
 addopts = "-v --tb=short"
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests", ".git", "migrations"]
+skips = []
+
+[tool.bandit.assert_used]
+skips = ["**/test_*.py", "**/*_test.py", "**/tests.py"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+exclude = [".venv", "migrations"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"webapp/views.py" = ["E501", "S608", "S307"]  # Intentionally vulnerable code
+"webapp/utils.py" = ["E501", "S506"]  # Intentionally using unsafe YAML load
+"config/settings.py" = ["E501", "S105", "S106"]  # Hardcoded secrets intentional
