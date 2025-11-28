@@ -1,1 +1,0 @@
-"""vulndjangoapp package"""

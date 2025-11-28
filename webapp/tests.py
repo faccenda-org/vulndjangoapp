@@ -2,7 +2,7 @@
 Unit tests for vulnerable utility functions.
 """
 from django.test import TestCase
-from vulnapp.utils import (
+from webapp.utils import (
     process_image,
     load_yaml_config,
     make_api_request,

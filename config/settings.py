@@ -1,5 +1,5 @@
 """
-Django settings for vulndjangoapp project.
+Django settings for config project.
 This application contains intentional vulnerabilities for testing purposes.
 DO NOT USE IN PRODUCTION.
 """
@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'vulnapp',
+    'webapp',
 ]
 
 MIDDLEWARE = [
@@ -40,7 +40,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'vulndjangoapp.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -58,7 +58,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'vulndjangoapp.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 DATABASES = {

@@ -13,7 +13,7 @@ import os
 
 def index(request):
     """Home page"""
-    return render(request, 'vulnapp/index.html')
+    return render(request, 'webapp/index.html')
 
 
 def search_user(request):
@@ -30,7 +30,7 @@ def search_user(request):
         rows = cursor.fetchall()
 
     users = [{'id': row[0], 'username': row[1], 'email': row[3]} for row in rows]
-    return render(request, 'vulnapp/search.html', {'users': users, 'query': username})
+    return render(request, 'webapp/search.html', {'users': users, 'query': username})
 
 
 def add_comment(request):
@@ -47,7 +47,7 @@ def add_comment(request):
         Comment.objects.create(user=user, content=content)
 
     comments = Comment.objects.all()
-    return render(request, 'vulnapp/comments.html', {'comments': comments})
+    return render(request, 'webapp/comments.html', {'comments': comments})
 
 
 def login(request):
@@ -65,9 +65,7 @@ def login(request):
         except User.DoesNotExist:
             return HttpResponse("Invalid credentials")
 
-    return render(request, 'vulnapp/login.html')
-
-
+    return render(request, 'webapp/login.html')
 def user_profile(request):
     """
     Path traversal vulnerability

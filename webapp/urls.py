@@ -1,4 +1,4 @@
-"""URL patterns for vulnapp"""
+"""URL patterns for webapp"""
 from django.urls import path
 from . import views
 

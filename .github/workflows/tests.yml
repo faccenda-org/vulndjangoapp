@@ -40,7 +40,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          uv run pytest vulnapp/tests.py -v --tb=short
+          uv run pytest webapp/tests.py -v --tb=short
 
       - name: Test summary
         if: always()
