@@ -10,6 +10,7 @@ dependencies = [
     "pyyaml==5.3.1",
     "requests==2.32.0",
     "jinja2==2.11.0",
+    "markupsafe==1.1.1",  # Pin to version compatible with Jinja2 2.11.x
 ]
 
 [build-system]
