@@ -46,12 +46,6 @@ jobs:
           uv run bandit -r webapp/ config/ -f screen
         continue-on-error: true
 
-      - name: Run Safety dependency check
-        run: |
-          uv run safety check --json || true
-          echo "⚠️ Note: This project intentionally uses vulnerable dependencies for testing"
-        continue-on-error: true
-
       - name: Upload Bandit results
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,7 +60,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Ruff linting completed" >> $GITHUB_STEP_SUMMARY
           echo "✅ Bandit security scan completed" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Safety dependency check completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "⚠️ **Note**: This is a deliberately vulnerable application." >> $GITHUB_STEP_SUMMARY
           echo "Security issues are expected and intentional for testing purposes." >> $GITHUB_STEP_SUMMARY

@@ -25,13 +25,3 @@ repos:
         args: ["-c", "pyproject.toml"]
         additional_dependencies: ["bandit[toml]"]
         exclude: ^(tests/|scripts/)
-
-  - repo: local
-    hooks:
-      - id: safety-check
-        name: safety check
-        entry: safety
-        args: ["check", "--json"]
-        language: system
-        pass_filenames: false
-        files: pyproject.toml

@@ -193,7 +193,6 @@ The `scripts/auto_merge.py` script evaluates Dependabot PRs using:
 ### Code Quality Checks
 - **Ruff**: Linting and formatting
 - **Bandit**: Security vulnerability scanning
-- **Safety**: Dependency vulnerability checking
 - **Pre-commit hooks**: Automated code quality enforcement
 
 ### Auto-merge Dependabot
@@ -208,7 +207,6 @@ The `scripts/auto_merge.py` script evaluates Dependabot PRs using:
 - **Burp Suite** - Web vulnerability scanner
 - **SQLMap** - Automated SQL injection testing
 - **Bandit** - Python security linter
-- **Safety** - Dependency vulnerability scanner
 - **Ruff** - Fast Python linter with security rules
 
 Run security scans:
@@ -218,9 +216,6 @@ uv sync --group lint
 
 # Run Bandit security scan
 uv run bandit -r webapp/ config/
-
-# Run Safety dependency check
-uv run safety check
 
 # Run Ruff linter
 uv run ruff check .
