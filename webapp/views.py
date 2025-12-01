@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db import connection
 from .models import User, Comment
-from .utils import process_image, load_yaml_config, make_api_request
+from .utils import process_image, load_yaml_config, make_api_request, render_template
 import tempfile
 import os
 
@@ -162,6 +162,37 @@ def proxy_request(request):
         <form method="GET">
             <input type="text" name="url" value="https://api.github.com/zen" size="50">
             <button type="submit">Fetch</button>
+        </form>
+        <p><a href="/">← Back</a></p>
+    """)
+
+
+def template_render(request):
+    """
+    Server-Side Template Injection (SSTI) vulnerability
+    Uses Jinja2 2.11.3 (CVE-2024-22195, CVE-2020-28493)
+    """
+    template_str = request.GET.get('template', 'Hello {{ name }}!')
+    name = request.GET.get('name', 'World')
+
+    if request.method == 'GET' and template_str != 'Hello {{ name }}!':
+        # VULNERABLE: Render user-provided template without sandboxing
+        try:
+            result = render_template(template_str, {'name': name})
+            return HttpResponse(f"<pre>Rendered:\n{result}</pre>")
+        except Exception as e:
+            return HttpResponse(f"<pre>Error: {e}</pre>")
+
+    return HttpResponse("""
+        <h1>Template Render (Jinja2 CVE-2024-22195, CVE-2020-28493)</h1>
+        <p>⚠️ Vulnerable to SSTI attacks!</p>
+        <p>Try: <code>{{ config.items() }}</code> or <code>{{ ''.__class__.__mro__[1].__subclasses__() }}</code></p>
+        <form method="GET">
+            <label>Template:</label><br>
+            <input type="text" name="template" value="Hello {{ name }}!" size="50"><br>
+            <label>Name:</label><br>
+            <input type="text" name="name" value="World" size="50"><br>
+            <button type="submit">Render</button>
         </form>
         <p><a href="/">← Back</a></p>
     """)

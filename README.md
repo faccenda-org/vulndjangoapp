@@ -8,7 +8,7 @@ This is a deliberately vulnerable Django application built to demonstrate common
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.11+
 - uv (package manager)
 
 ## Setup
@@ -101,10 +101,17 @@ This is a deliberately vulnerable Django application built to demonstrate common
    - **Vulnerability:** `AUTH_PASSWORD_VALIDATORS` is empty
    - **Impact:** Users can set weak passwords
 
-### 11. **Vulnerable Dependencies**
+### 11. **Server-Side Template Injection (SSTI)**
+   - **Location:** `/template/` endpoint
+   - **Vulnerability:** User-provided Jinja2 templates rendered without sandboxing
+   - **Test:** Try `{{ config.items() }}` or `{{ ''.__class__.__mro__[1].__subclasses__() }}`
+   - **Impact:** Arbitrary code execution on the server
+
+### 12. **Vulnerable Dependencies**
    - **Pillow 9.3.0**: CVE-2023-50447 (Arbitrary code execution via crafted images)
    - **PyYAML 5.3.1**: CVE-2020-14343 (Arbitrary code execution via unsafe YAML loading)
    - **Requests 2.32.0**: Potential SSRF vulnerabilities
+   - **Jinja2 2.11.3**: CVE-2024-22195 (XSS), CVE-2020-28493 (ReDoS)
 
 ## File Structure
 

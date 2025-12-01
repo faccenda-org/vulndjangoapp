@@ -3,12 +3,13 @@ name = "vulndjangoapp"
 version = "0.1.0"
 description = "Django application with known vulnerabilities for security testing"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 dependencies = [
     "django==3.2.0",
     "pillow==9.3.0",
     "pyyaml==5.3.1",
     "requests==2.32.0",
+    "jinja2==2.11.0",
 ]
 
 [build-system]
@@ -44,7 +45,7 @@ skips = ["**/test_*.py", "**/*_test.py", "**/tests.py"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py311"
 exclude = [".venv", "migrations"]
 
 [tool.ruff.lint]

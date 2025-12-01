@@ -29,6 +29,7 @@
         <li>🖼️ <a href="/upload/">Image Upload</a> - Pillow CVE-2023-50447 (code execution)</li>
         <li>⚙️ <a href="/config/">YAML Config</a> - PyYAML CVE-2020-14343 (code execution)</li>
         <li>🌐 <a href="/proxy/">Proxy Request</a> - Requests CVE-2021-33503 (SSRF)</li>
+        <li>📝 <a href="/template/">Template Render</a> - Jinja2 CVE-2024-22195, CVE-2020-28493 (SSTI)</li>
     </ul>
 
     <h2>Known Vulnerabilities:</h2>
@@ -36,11 +37,13 @@
         <li>Django 3.2.0 (Multiple Critical CVEs)</li>
         <li>Pillow 9.3.0 (CVE-2023-50447 - Arbitrary code execution)</li>
         <li>PyYAML 5.3.1 (CVE-2020-14343 - Arbitrary code execution)</li>
-        <li>Requests 2.25.0 (CVE-2021-33503 - SSRF vulnerability)</li>
+        <li>Requests 2.32.0 (CVE-2021-33503 - SSRF vulnerability)</li>
+        <li>Jinja2 2.11.3 (CVE-2024-22195, CVE-2020-28493 - XSS, ReDoS)</li>
         <li>SQL Injection</li>
         <li>Cross-Site Scripting (XSS)</li>
         <li>CSRF Protection Disabled</li>
         <li>Path Traversal</li>
+        <li>Server-Side Template Injection (SSTI)</li>
         <li>Hardcoded Secret Key</li>
         <li>Plain Text Password Storage</li>
         <li>No Password Validation</li>

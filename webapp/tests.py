@@ -6,7 +6,8 @@ from webapp.utils import (
     process_image,
     load_yaml_config,
     make_api_request,
-    fetch_remote_image
+    fetch_remote_image,
+    render_template
 )
 from PIL import Image
 import os
@@ -154,3 +155,52 @@ class RemoteImageTests(TestCase):
         except Exception:
             # Expected to fail without proper mocking
             pass
+
+
+class TemplateRenderTests(TestCase):
+    """Tests for Jinja2 template rendering (vulnerable: CVE-2024-22195, CVE-2020-28493)"""
+
+    def test_render_simple_template(self):
+        """Test rendering simple template"""
+        template = "Hello {{ name }}!"
+        context = {'name': 'World'}
+        
+        result = render_template(template, context)
+        
+        self.assertEqual(result, "Hello World!")
+
+    def test_render_template_with_loop(self):
+        """Test rendering template with loop"""
+        template = "{% for item in items %}{{ item }},{% endfor %}"
+        context = {'items': ['a', 'b', 'c']}
+        
+        result = render_template(template, context)
+        
+        self.assertEqual(result, "a,b,c,")
+
+    def test_render_template_with_conditional(self):
+        """Test rendering template with conditional"""
+        template = "{% if active %}Active{% else %}Inactive{% endif %}"
+        
+        result_active = render_template(template, {'active': True})
+        result_inactive = render_template(template, {'active': False})
+        
+        self.assertEqual(result_active, "Active")
+        self.assertEqual(result_inactive, "Inactive")
+
+    def test_render_template_empty_context(self):
+        """Test rendering template with empty context"""
+        template = "Static content"
+        
+        result = render_template(template)
+        
+        self.assertEqual(result, "Static content")
+
+    def test_render_template_with_expressions(self):
+        """Test rendering template with expressions"""
+        template = "{{ 2 + 2 }} is {{ result }}"
+        context = {'result': 4}
+        
+        result = render_template(template, context)
+        
+        self.assertEqual(result, "4 is 4")

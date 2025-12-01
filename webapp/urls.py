@@ -11,4 +11,5 @@ urlpatterns = [
     path('upload/', views.upload_image, name='upload'),
     path('config/', views.load_config, name='config'),
     path('proxy/', views.proxy_request, name='proxy'),
+    path('template/', views.template_render, name='template'),
 ]

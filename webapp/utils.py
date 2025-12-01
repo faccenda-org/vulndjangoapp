@@ -4,8 +4,10 @@ DO NOT USE IN PRODUCTION.
 """
 import requests
 import yaml
-from PIL import Image
 from io import BytesIO
+
+from PIL import Image
+from jinja2 import Template
 
 
 def fetch_remote_image(url: str) -> Image.Image:
@@ -63,3 +65,16 @@ def make_api_request(url: str, params: dict = None) -> dict:
         return response.json()
     except requests.RequestException as e:
         return {'error': str(e)}
+
+
+def render_template(template_string: str, context: dict = None) -> str:
+    """
+    Render a Jinja2 template with given context.
+
+    VULNERABLE: Uses Jinja2 2.11.3 which has CVE-2024-22195 (XSS vulnerability)
+    and CVE-2020-28493 (ReDoS vulnerability). Additionally, rendering user-provided
+    templates without sandboxing allows Server-Side Template Injection (SSTI).
+    """
+    # VULNERABLE: No sandboxing, allows SSTI attacks
+    template = Template(template_string)
+    return template.render(context or {})
